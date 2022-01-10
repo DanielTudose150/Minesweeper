@@ -16,7 +16,8 @@ class Game:
         self.images = None
         self.board = board
         self.screenSize = screenSize
-        self.pieceSize = self.screenSize[0] // self.board.getSize()[1], self.screenSize[1] // self.board.getSize()[0]
+        #self.pieceSize = self.screenSize[0] // self.board.getSize()[1], self.screenSize[1] // self.board.getSize()[0]
+        self.setPieceSize((self.screenSize[0], self.screenSize[1] - 100), self.board.getSize())
         setcwd()
         self.loadImages()
 
@@ -35,7 +36,7 @@ class Game:
         pygame.quit()
 
     def draw(self):
-        topLeft = (0, 0)
+        topLeft = (0, 100)
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
                 image = self.images["normal-block"]
@@ -53,3 +54,6 @@ class Game:
             image = pygame.transform.scale(image, self.pieceSize)
             self.images[fileName.split(".")[0]] = image
 
+    def setPieceSize(self, screenSize, boardSize):
+        maxi = max(boardSize[0], boardSize[1])
+        self.pieceSize = screenSize[0] // maxi, screenSize[1] // maxi
