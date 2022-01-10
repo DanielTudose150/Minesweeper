@@ -6,30 +6,24 @@ class Board:
         self.board = None
         self.size = size
         self.numberOfBombs = self.getNumberOfBombs(self.size)
+        self.spaces = self.size[0] * self.size[1] - self.numberOfBombs
         self.setBoard()
 
     def setBoard(self):
         self.board = []
         bombs = self.getBombs(self.numberOfBombs)
-
-        trues = 0
-        falses = 0
-        for i in bombs:
-            print(i)
-        print(f"bombs.length = {len(bombs)}")
         for row in range(self.size[0]):
             rowList = []
             for col in range(self.size[1]):
                 piece = None
                 if (row, col) in bombs:
                     piece = Piece(True)
-                    trues = trues + 1
                 else:
                     piece = Piece(False)
-                    falses  = falses + 1
                 rowList.append(piece)
             self.board.append(rowList)
-        print(f"{trues}\n{falses}")
+        self.setNumbers()
+
 
     def getSize(self):
         return self.size
@@ -50,9 +44,35 @@ class Board:
         bombList.sort()
         for i in range(len(bombList)):
             bombList[i] = (bombList[i] // self.size[1], bombList[i] % self.size[1])
-
-        print(self.size)
         return bombList
 
     def getPiece(self, piece):
         return self.board[piece[0]][piece[1]]
+
+    def setNumbers(self):
+        for row in range(self.size[0]):
+            for col in range(self.size[1]):
+                index = (row, col)
+                value = self.getNumber(index)
+                self.getPiece(index).setNumber(value)
+
+    def getNumber(self, index):
+        x = [-1, -1, 0, 1, 1, 1, 0, -1]
+        y = [0, 1, 1, 1, 0, -1, -1, -1]
+        move = []
+        for i in range(len(x)):
+            move.append((x[i], y[i]))
+        value = 0
+        for m in move:
+            pos = (index[0] + m[0], index[1] + m[1])
+            if not self.outOfBounds(pos):
+                if self.getPiece(pos).getHasBomb():
+                    value += 1
+        return value
+
+    def outOfBounds(self, index):
+        if index[0] < 0 or index[0] >= self.size[0]:
+            return True
+        if index[1] < 0 or index[1] >= self.size[1]:
+            return True
+        return False

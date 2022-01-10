@@ -57,5 +57,13 @@ class Game:
         self.pieceSize = screenSize[0] // maxi, screenSize[1] // maxi
 
     def getImage(self, piece):
-        string = "mine-unclicked-block" if piece.getHasBomb() else "normal-block"
+        string = None
+        """
+        if piece.getHasBomb():
+            string = "mine-unclicked-block"
+        else:
+            value = piece.getNumber()
+            string = str(value) if value else "normal-block"
+        """
+        
         return self.images[string]

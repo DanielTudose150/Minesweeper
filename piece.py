@@ -3,6 +3,7 @@ class Piece:
         self.hasBomb = hasBomb
         self.clicked = False
         self.flagged = False
+        self.number = 0
 
     def getHasBomb(self):
         return self.hasBomb
@@ -12,3 +13,9 @@ class Piece:
 
     def getFlagged(self):
         return self.flagged
+
+    def setNumber(self, number):
+        self.number = number
+
+    def getNumber(self):
+        return self.number
