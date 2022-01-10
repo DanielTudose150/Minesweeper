@@ -1,6 +1,6 @@
 import pygame
 import os
-
+from time import sleep
 
 def setcwd():
     abspath = os.path.abspath(__file__)
@@ -39,6 +39,16 @@ class Game:
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
+            if self.board.getWon():
+                sound = pygame.mixer.Sound("sound\\win.mp3")
+                sound.play()
+                sleep(3)
+                running = False
+            if self.board.getLost():
+                sound = pygame.mixer.Sound("sound\\lose.mp3")
+                sound.play()
+                sleep(3)
+                running = False
         pygame.quit()
 
     def draw(self):
@@ -82,6 +92,8 @@ class Game:
         return self.images[string]
 
     def handleClick(self, position, rightClick):
+        if self.board.getLost():
+            return
         index = (position[1] - self.offset) // self.pieceSize[1], position[0] // self.pieceSize[0]
         if self.indexOutOfBounds(index):
             return
