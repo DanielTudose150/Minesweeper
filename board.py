@@ -12,16 +12,24 @@ class Board:
         self.board = []
         bombs = self.getBombs(self.numberOfBombs)
 
+        trues = 0
+        falses = 0
+        for i in bombs:
+            print(i)
+        print(f"bombs.length = {len(bombs)}")
         for row in range(self.size[0]):
             rowList = []
             for col in range(self.size[1]):
                 piece = None
                 if (row, col) in bombs:
                     piece = Piece(True)
+                    trues = trues + 1
                 else:
                     piece = Piece(False)
+                    falses  = falses + 1
                 rowList.append(piece)
             self.board.append(rowList)
+        print(f"{trues}\n{falses}")
 
     def getSize(self):
         return self.size
@@ -41,12 +49,9 @@ class Board:
         bombList = sample(range(self.size[0] * self.size[1]), bombs)
         bombList.sort()
         for i in range(len(bombList)):
-            bombList[i] = (bombList[i] // self.size[0], bombList[i] % self.size[1])
+            bombList[i] = (bombList[i] // self.size[1], bombList[i] % self.size[1])
 
-        print("Will print the coordinates of the bombs:")
-        for i in bombList:
-            print(i)
-
+        print(self.size)
         return bombList
 
     def getPiece(self, piece):
