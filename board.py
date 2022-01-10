@@ -1,12 +1,16 @@
 from piece import Piece
 from random import sample
 
+
 class Board:
     def __init__(self, size):
+        self.lost = False
+        self.won = False
         self.board = None
         self.size = size
         self.numberOfBombs = self.getNumberOfBombs(self.size)
         self.spaces = self.size[0] * self.size[1] - self.numberOfBombs
+        self.clicked = 0
         self.setBoard()
 
     def setBoard(self):
@@ -23,7 +27,6 @@ class Board:
                 rowList.append(piece)
             self.board.append(rowList)
         self.setNumbers()
-
 
     def getSize(self):
         return self.size
@@ -76,3 +79,31 @@ class Board:
         if index[1] < 0 or index[1] >= self.size[1]:
             return True
         return False
+
+    def handleClick(self, piece, index, flag):
+        if piece.getClicked() or (not flag and piece.getFlagged()):
+            return
+        if flag:
+            piece.setFlag()
+            return
+        piece.setClicked()
+        if piece.getHasBomb():
+            self.lost = True
+            return
+        self.clicked += 1
+        if piece.getNumber() != 0:
+            return
+        move = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        for m in move:
+            pos = index[0] + m[0], index[1] + m[1]
+            if self.outOfBounds(pos):
+                continue
+            piece2 = self.getPiece(pos)
+            if (not piece2.getHasBomb()) and (not piece2.getClicked()):
+                self.handleClick(piece2, pos, False)
+
+    def getWon(self):
+        return self.spaces == self.clicked
+
+    def getLost(self):
+        return self.lost

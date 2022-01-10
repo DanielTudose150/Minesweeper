@@ -19,3 +19,9 @@ class Piece:
 
     def getNumber(self):
         return self.number
+
+    def setFlag(self):
+        self.flagged = not self.flagged
+
+    def setClicked(self):
+        self.clicked = True
