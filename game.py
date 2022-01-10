@@ -4,9 +4,7 @@ import os
 
 def setcwd():
     abspath = os.path.abspath(__file__)
-    print("Abspath: " + abspath)
     dirname = os.path.dirname(abspath)
-    print("Dirname: " + dirname)
     os.chdir(dirname)
 
 
@@ -39,14 +37,14 @@ class Game:
         topLeft = (0, 100)
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
-                image = self.images["normal-block"]
+                piece = self.board.getPiece((row, col))
+                image = self.getImage(piece)
                 self.screen.blit(image, topLeft)
                 topLeft = topLeft[0] + self.pieceSize[0], topLeft[1]
             topLeft = 0, topLeft[1] + self.pieceSize[1]
 
     def loadImages(self):
         self.images = {}
-        print(os.path.abspath(os.getcwd()))
         for fileName in os.listdir("assets"):
             if not fileName.endswith(".png"):
                 continue
@@ -57,3 +55,7 @@ class Game:
     def setPieceSize(self, screenSize, boardSize):
         maxi = max(boardSize[0], boardSize[1])
         self.pieceSize = screenSize[0] // maxi, screenSize[1] // maxi
+
+    def getImage(self, piece):
+        string = "mine-unclicked-block" if piece.getHasBomb() else "normal-block"
+        return self.images[string]

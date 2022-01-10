@@ -1,7 +1,7 @@
 from game import Game
 from board import Board
 
-boardSize = (16, 30)
+boardSize = (10, 10)
 screenSize = (1000, 1000)
 
 board = Board(boardSize)
