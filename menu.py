@@ -25,6 +25,7 @@ class Menu:
         self.time = False
         self.font = "font\\mine-sweeper.ttf"
         self.loadImages()
+        pygame.display.set_caption('Minesweeper')
 
     def run(self):
         value = [8, 0, 0, self.time]

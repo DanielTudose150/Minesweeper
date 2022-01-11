@@ -42,6 +42,9 @@ class Board:
         # 15/100 * blocks = bombs
         return int(0.15 * size[0] * size[1])
 
+    def getNoBombs(self):
+        return self.numberOfBombs
+
     def getBombs(self, bombs):
         bombList = sample(range(self.size[0] * self.size[1]), bombs)
         # bombList.sort()
@@ -78,17 +81,17 @@ class Board:
 
     def handleClick(self, piece, index, flag):
         if piece.getClicked() or (not flag and piece.getFlagged()):
-            return
+            return 0
         if flag:
             piece.setFlag()
-            return
+            return -1 if piece.getFlagged() else 1
         piece.setClicked()
         if piece.getHasBomb():
             self.lost = True
-            return
+            return 0
         self.clicked += 1
         if piece.getNumber() != 0:
-            return
+            return 0
         move = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
         for m in move:
             pos = index[0] + m[0], index[1] + m[1]
@@ -97,6 +100,7 @@ class Board:
             piece2 = self.getPiece(pos)
             if (not piece2.getHasBomb()) and (not piece2.getClicked()):
                 self.handleClick(piece2, pos, False)
+        return 0
 
     def getWon(self):
         return self.spaces == self.clicked
