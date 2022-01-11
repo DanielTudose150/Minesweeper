@@ -2,3 +2,5 @@
 __pycache__
 sound
 .mp3
+.idea
+venv
