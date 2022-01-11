@@ -2,6 +2,7 @@ import pygame
 import os
 from time import sleep
 
+
 def setcwd():
     abspath = os.path.abspath(__file__)
     dirname = os.path.dirname(abspath)
@@ -15,11 +16,10 @@ class Game:
         self.board = board
         self.screenSize = screenSize
         self.offset = offset
-        #self.pieceSize = self.screenSize[0] // self.board.getSize()[1], self.screenSize[1] // self.board.getSize()[0]
+        # self.pieceSize = self.screenSize[0] // self.board.getSize()[1], self.screenSize[1] // self.board.getSize()[0]
         self.setPieceSize((self.screenSize[0], self.screenSize[1] - self.offset), self.board.getSize())
         setcwd()
         self.loadImages()
-
 
     def run(self):
         pygame.init()

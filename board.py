@@ -60,11 +60,7 @@ class Board:
                 self.getPiece(index).setNumber(value)
 
     def getNumber(self, index):
-        x = [-1, -1, 0, 1, 1, 1, 0, -1]
-        y = [0, 1, 1, 1, 0, -1, -1, -1]
-        move = []
-        for i in range(len(x)):
-            move.append((x[i], y[i]))
+        move = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
         value = 0
         for m in move:
             pos = (index[0] + m[0], index[1] + m[1])
@@ -93,7 +89,7 @@ class Board:
         self.clicked += 1
         if piece.getNumber() != 0:
             return
-        move = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        move = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
         for m in move:
             pos = index[0] + m[0], index[1] + m[1]
             if self.outOfBounds(pos):
