@@ -44,13 +44,13 @@ class Board:
 
     def getBombs(self, bombs):
         bombList = sample(range(self.size[0] * self.size[1]), bombs)
-        bombList.sort()
+        # bombList.sort()
         for i in range(len(bombList)):
             bombList[i] = (bombList[i] // self.size[1], bombList[i] % self.size[1])
         return bombList
 
-    def getPiece(self, piece):
-        return self.board[piece[0]][piece[1]]
+    def getPiece(self, index):
+        return self.board[index[0]][index[1]]
 
     def setNumbers(self):
         for row in range(self.size[0]):

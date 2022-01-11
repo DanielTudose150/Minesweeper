@@ -10,13 +10,13 @@ def setcwd():
 
 
 class Game:
-    def __init__(self, board, screenSize, offset):
+    def __init__(self, board, screenSize, offset, timed):
         self.screen = None
         self.images = None
         self.board = board
         self.screenSize = screenSize
         self.offset = offset
-        # self.pieceSize = self.screenSize[0] // self.board.getSize()[1], self.screenSize[1] // self.board.getSize()[0]
+        self.timed = timed
         self.setPieceSize((self.screenSize[0], self.screenSize[1] - self.offset), self.board.getSize())
         setcwd()
         self.loadImages()
@@ -63,10 +63,10 @@ class Game:
 
     def loadImages(self):
         self.images = {}
-        for fileName in os.listdir("assets"):
+        for fileName in os.listdir("assets\\game"):
             if not fileName.endswith(".png"):
                 continue
-            image = pygame.image.load(r"assets\\" + fileName)
+            image = pygame.image.load(r"assets\\game\\" + fileName)
             image = pygame.transform.scale(image, self.pieceSize)
             self.images[fileName.split(".")[0]] = image
 
