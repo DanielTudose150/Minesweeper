@@ -3,7 +3,7 @@ from random import sample
 
 
 class Board:
-    def __init__(self, size):
+    def __init__(self, size, custom):
         self.lost = False
         self.won = False
         self.board = None
@@ -11,7 +11,7 @@ class Board:
         self.numberOfBombs = self.getNumberOfBombs(self.size)
         self.spaces = self.size[0] * self.size[1] - self.numberOfBombs
         self.clicked = 0
-        self.setBoard()
+        self.setBoard() if not custom else self.setBombs(custom)
 
     def setBoard(self):
         self.board = []
@@ -107,3 +107,20 @@ class Board:
 
     def getLost(self):
         return self.lost
+
+    def setBombs(self, bombs):
+        self.numberOfBombs = bombs
+        mines = self.getBombs(bombs)
+        self.board = []
+        for row in range(self.size[0]):
+            rowList = []
+            for col in range(self.size[1]):
+                piece = None
+                if (row, col) in mines:
+                    piece = Piece(True)
+                else:
+                    piece = Piece(False)
+                rowList.append(piece)
+            self.board.append(rowList)
+        self.setNumbers()
+

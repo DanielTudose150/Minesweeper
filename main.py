@@ -8,7 +8,7 @@ def handleValue(value):
     if value[0] == 8:
         sys.exit()
     if 3 <= value[0] <= 6:
-        return (value[1], value[2], value[3])
+        return (value[1], value[2], value[3], value[4])
 
 
 offset = 100
@@ -19,11 +19,12 @@ running = menu.run()
 res = handleValue(running)
 
 size = res[0], res[1]
-timed = res[2]
+mines = res[2]
+timed = res[3]
 
 boardSize = size
 
 
-board = Board(boardSize)
+board = Board(boardSize, mines)
 game = Game(board, screenSize, offset, timed)
 game.run()

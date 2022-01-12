@@ -104,6 +104,7 @@ class Menu:
     def handleCustom(self):
         row = 9
         col = 9
+        mines = 10
 
         running = True
         images = self.getCustomImages()
@@ -114,20 +115,21 @@ class Menu:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
-                    value = self.handleCustomClick(position, row, col)
+                    value = self.handleCustomClick(position, row, col, mines)
                     running = value[0]
                     row = value[1]
                     col = value[2]
+                    mines = value[3]
             self.window.fill(self.GREY)
             display.fill(self.GREY)
             # display.blit(self.images["title"], (0, 0))
             display = self.drawCustomButtons(display, images)
-            display = self.drawRectangles(display, row, col)
+            display = self.drawRectangles(display, row, col, mines)
 
             self.window.blit(display, (0, 0))
             pygame.display.flip()
 
-        return (6, row, col, self.time)
+        return (6, row, col, mines, self.time)
 
     def getCustomImages(self):
         images = {}
@@ -144,8 +146,11 @@ class Menu:
         return images
 
     def drawCustomButtons(self, display, images):
-        topLeftLeft = (200, 300)
-        topLeftRight = (600, 300)
+        topLeftLeft = (100, 300)
+        topLeftCenter = (400, 300)
+        topLeftRight = (700, 300)
+
+        # row buttons
         topLeft = topLeftLeft
         display.blit(images["plus-1"], topLeft)
 
@@ -158,6 +163,20 @@ class Menu:
         topLeft = topLeft[0] + 100, topLeft[1]
         display.blit(images["minus-10"], topLeft)
 
+        # col buttons
+        topLeft = topLeftCenter
+        display.blit(images["plus-1"], topLeft)
+
+        topLeft = topLeft[0] + 100, topLeft[1]
+        display.blit(images["plus-10"], topLeft)
+
+        topLeft = topLeftCenter[0], topLeftCenter[1] + 200
+        display.blit(images["minus-1"], topLeft)
+
+        topLeft = topLeft[0] + 100, topLeft[1]
+        display.blit(images["minus-10"], topLeft)
+
+        # bombs buttons
         topLeft = topLeftRight
         display.blit(images["plus-1"], topLeft)
 
@@ -177,13 +196,16 @@ class Menu:
         display.blit(images["start"], topLeft)
         return display
 
-    def drawRectangles(self, display, row, col):
-        rect1 = pygame.Rect(200, 400, 200, 100)
-        rect2 = pygame.Rect(600, 400, 200, 100)
+    def drawRectangles(self, display, row, col, mines):
+        rect1 = pygame.Rect(100, 400, 200, 100)
+        rect2 = pygame.Rect(400, 400, 200, 100)
+        rect3 = pygame.Rect(700, 400, 200, 100)
 
         pygame.draw.rect(display, (0, 0, 0), rect1)
         pygame.draw.rect(display, (0, 0, 0), rect2)
+        pygame.draw.rect(display, (0, 0, 0), rect3)
 
+        # rows counter
         font = pygame.font.Font(self.font, 20)
         text = font.render(str(row), True, self.RED)
         textRect = text.get_rect()
@@ -191,18 +213,50 @@ class Menu:
 
         display.blit(text, textRect)
 
+        # row text
+        text = font.render("ROWS", True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect1.center[0], rect1.center[1] + 200
+
+        display.blit(text, textRect)
+
+        # columns counter
         text = font.render(str(col), True, self.RED)
         textRect = text.get_rect()
         textRect.center = rect2.center
 
         display.blit(text, textRect)
+
+        # column text
+
+        text = font.render("COLUMNS", True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect2.center[0], rect2.center[1] + 200
+
+        display.blit(text, textRect)
+
+        # mines counter
+        text = font.render(str(mines), True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect3.center
+
+        display.blit(text, textRect)
+
+        # mine counter
+
+        text = font.render("MINES", True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect3.center[0], rect3.center[1] + 200
+
+        display.blit(text, textRect)
+
         return display
 
-    def handleCustomClick(self, position, row, col):
+    def handleCustomClick(self, position, row, col, mines):
         running = True
         index = position[0] // 50, position[1] // 100
 
-        if 4 <= index[0] <= 5:
+        if 2 <= index[0] <= 3:
             if index[1] == 3:
                 row += 1
                 if row > 99:
@@ -211,7 +265,7 @@ class Menu:
                 row -= 1
                 if row < 5:
                     row = 5
-        elif 6 <= index[0] <= 7:
+        elif 4 <= index[0] <= 5:
             if index[1] == 3:
                 row += 10
                 if row > 99:
@@ -220,7 +274,7 @@ class Menu:
                 row -= 10
                 if row < 5:
                     row = 5
-        elif 12 <= index[0] <= 13:
+        elif 8 <= index[0] <= 9:
             if index[1] == 3:
                 col += 1
                 if col > 99:
@@ -229,7 +283,9 @@ class Menu:
                 col -= 1
                 if col < 5:
                     col = 5
-        elif 14 <= index[0] <= 15:
+            elif index[1] == 8:
+                running = False
+        elif 10 <= index[0] <= 11:
             if index[1] == 3:
                 col += 10
                 if col > 99:
@@ -238,8 +294,23 @@ class Menu:
                 col -= 10
                 if col < 5:
                     col = 5
-        elif 8 <= index[0] <= 11:
-            if index[1] == 8:
-                running = False
+        elif 14 <= index[0] <= 15:
+            if index[1] == 3:
+                mines += 1
+                if mines > row * col:
+                    mines = row * col
+            elif index[1] == 5:
+                mines -= 1
+                if mines < 3:
+                    mines = 3
+        elif 16 <= index[0] <= 17:
+            if index[1] == 3:
+                mines += 10
+                if mines > row * col:
+                    mines = row * col
+            elif index[1] == 5:
+                mines -= 10
+                if mines < 3:
+                    mines = 3
 
-        return running, row, col
+        return running, row, col, mines
