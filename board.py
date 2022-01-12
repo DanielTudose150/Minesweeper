@@ -3,6 +3,59 @@ from random import sample
 
 
 class Board:
+    """
+    A class used to represent the board of the Minesweeper game.
+
+    Attributes
+    ----------
+        lost : bool
+            a check if the state of the board results in a lost game
+        won : bool
+            a check if the state of the board results in a won game
+        board : list[list[Piece]
+            a matrix representing the board
+        size : (int, int)
+            width and height of the board
+        numberOfBombs : int
+            number of bombs on the board
+        spaces : int
+            number of non-mines on the board
+        clicked : int
+            number of clicked blocks by the user
+
+    Methods
+    -------
+        setBoard():
+            Sets the board up if the size of board is not custom.
+        getSize():
+            Return the size of board
+        getNumberOfBombs(size):
+            Determines and returns the number of mines relative to the side of the board.
+        getNoBombs():
+            Returns the number of mines on the board
+        getBombs(bombs):
+            Returns a list of the coordinates of the mines
+        getPiece(index):
+            Returns the piece at the given index.
+        setNumbers():
+            Determines the values of the non-mines blocks.
+        getNumber(index):
+            Returns the number of mines around the Piece at the given index.
+        outOfBounds(index):
+            Checks if the given coordinates are outside the board.
+        handleClick(piece, index, flag):
+            Interprets the user click at a given position and updates the board accordingly.
+        getWon():
+            Checks if the win condition has been achieved.
+        setWon(won):
+            Sets the won stats to the parameter.
+        getLost():
+            Returns the status regarding the lost status.
+        setLost(lost):
+            Sets the won stats to the parameter.
+        setBombs(bombs):
+            Sets the number of mines to the parameters and generates bombs coordinates for the mines.
+    """
     def __init__(self, size, custom):
         self.lost = False
         self.won = False
@@ -58,6 +111,7 @@ class Board:
         return self.board[index[0]][index[1]]
 
     def setNumbers(self):
+        """Determines the values of the non-mines blocks."""
         for row in range(self.size[0]):
             for col in range(self.size[1]):
                 index = (row, col)
@@ -65,6 +119,19 @@ class Board:
                 self.getPiece(index).setNumber(value)
 
     def getNumber(self, index):
+        """
+        Returns the number of mines around the piece at the given index.
+
+        Parameters
+        ----------
+            index : (int, int)
+                coordinates of the piece
+
+        Return
+        ------
+            value : int
+                number of mines around the piece
+        """
         move = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
         value = 0
         for m in move:
@@ -75,6 +142,18 @@ class Board:
         return value
 
     def outOfBounds(self, index):
+        """
+        Checks if the given coordinates are outside the board.
+
+        Parameters
+        ----------
+            index : (int, int)
+                coordinates
+
+        Return
+        ------
+            True or False
+        """
         if index[0] < 0 or index[0] >= self.size[0]:
             return True
         if index[1] < 0 or index[1] >= self.size[1]:
@@ -82,6 +161,23 @@ class Board:
         return False
 
     def handleClick(self, piece, index, flag):
+        """
+        Interprets the user click at a given position and updates the board accordingly.
+
+        Parameters
+        ----------
+            piece : Piece
+                the block on the board
+            index : (int, int)
+                coordinates of the piece
+            flag : bool
+                represents whether the click was right click or not
+
+        Return
+        ------
+            -1 or 1 if the click was a right click
+            0 elsewhere
+        """
         if piece.getClicked() or (not flag and piece.getFlagged()):
             return 0
         if flag:
@@ -114,18 +210,36 @@ class Board:
         return 0
 
     def getWon(self):
+        """
+        Checks if the win condition has been achieved.
+
+        Return
+        ------
+            spaces == clicked
+        """
         return self.spaces == self.clicked
 
     def setWon(self, won):
+        """
+        Sets the won stats to the parameter.
+
+        Parameters
+        ----------
+            won : bool
+                the new status regarding the won status
+        """
         self.won = won
 
     def getLost(self):
+        """Returns the status regarding the lost status."""
         return self.lost
 
     def setLost(self, lost):
+        """Sets the won stats to the parameter."""
         self.lost = lost
 
     def setBombs(self, bombs):
+        """Sets the number of mines to the parameters and generates bombs coordinates for the mines."""
         self.numberOfBombs = bombs
         mines = self.getBombs(bombs)
         self.board = []

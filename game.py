@@ -298,6 +298,10 @@ class Game:
         ----------
             index : (int, int)
                 coordinates
+
+        Return
+        ------
+            True or False
         """
         if index[0] < 0 or index[0] >= self.board.getSize()[0]:
             return True
