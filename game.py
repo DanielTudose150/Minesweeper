@@ -60,7 +60,7 @@ class Game:
                 sleep(3)
                 self.running = False
         if self.retry:
-            self.board.__init__(self.board.getSize())
+            self.board.__init__(self.board.getSize(), self.board.getNoBombs())
             self.retry = False
             self.flags = self.board.getNoBombs()
             self.run()
@@ -155,6 +155,7 @@ class Game:
         self.screen.blit(self.headerImages["exit"], topLeft)
 
         self.drawFlags()
+        self.drawTime()
 
     def getRects(self):
         flags = pygame.Rect(100, 25, 100, 50)
@@ -165,7 +166,6 @@ class Game:
 
     def handleHeaderClick(self, position):
         index = position[0] // 50, position[1] // 25
-        print(index)
         if index[0] == 8:
             if 1 <= index[1] <= 2:
                 self.retry = True
@@ -189,6 +189,16 @@ class Game:
         text = font.render(str(self.flags), True, RED)
         textRect = text.get_rect()
         textRect.center = self.rects[0].center
+
+        self.screen.blit(text, textRect)
+
+    def drawTime(self):
+        RED = (255, 0, 0)
+        font = pygame.font.Font(self.font, 20)
+        value = 0 if not self.timed[0] else self.timed[1]
+        text = font.render(str(value), True, RED)
+        textRect = text.get_rect()
+        textRect.center = self.rects[1].center
 
         self.screen.blit(text, textRect)
 

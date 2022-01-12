@@ -22,13 +22,13 @@ class Menu:
         self.GREY = (192, 192, 192)
         self.RED = (255, 0, 0)
         self.buttonSize = (200, 100)
-        self.time = False
+        self.time = [False, 0]
         self.font = "font\\mine-sweeper.ttf"
         self.loadImages()
         pygame.display.set_caption('Minesweeper')
 
     def run(self):
-        value = [8, 0, 0, self.time]
+        value = [8, 0, 0, 0, self.time]
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -41,6 +41,8 @@ class Menu:
             # self.window.blit(self.display, (0, 0))
             self.draw()
             pygame.display.flip()
+        if self.time[0]:
+            value = self.handleTimedMenu(value)
         pygame.quit()
         return value
 
@@ -73,7 +75,7 @@ class Menu:
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["custom"], topLeft)
         topLeft = topLeft[0], topLeft[1] + 110
-        self.window.blit(self.images["time-no" if not self.time else "time-yes"], topLeft)
+        self.window.blit(self.images["time-no" if not self.time[0] else "time-yes"], topLeft)
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["exit"], topLeft)
 
@@ -81,25 +83,25 @@ class Menu:
         index = position[0] // 100, position[1] // 100
 
         if not (4 <= index[0] < 6):
-            return [0, 0, 0, self.time]
+            return [0, 0, 0, 0, self.time]
         if index[1] == 7:
-            self.time = not self.time
-            return [7, 0, 0, self.time]
+            self.time[0] = not self.time[0]
+            return [7, 0, 0, 0, self.time]
         if index[1] == 3:
             self.running = False
-            return [3, 9, 9, self.time]
+            return [3, 9, 9, 10, self.time]
         if index[1] == 4:
             self.running = False
-            return [4, 16, 16, self.time]
+            return [4, 16, 16, 40, self.time]
         if index[1] == 5:
             self.running = False
-            return [5, 16, 30, self.time]
+            return [5, 16, 30, 99, self.time]
         if index[1] == 6:
             self.running = False
             return self.handleCustom()
         if index[1] == 8:
             self.running = False
-            return [8, 0, 0, self.time]
+            return [8, 0, 0, 0, self.time]
 
     def handleCustom(self):
         row = 9
@@ -314,3 +316,93 @@ class Menu:
                     mines = 3
 
         return running, row, col, mines
+
+    def handleTimedMenu(self, value):
+        running = True
+        images = self.getCustomImages()
+        display = pygame.Surface(self.screenSize)
+        value[4][1] = 100
+
+        # value = [mode, row, col, mines, [timed, seconds]]
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    position = pygame.mouse.get_pos()
+                    res = self.handleTimeClick(position, value)
+                    running = res[0]
+                    value = res[1]
+
+            self.window.fill(self.GREY)
+            display.fill(self.GREY)
+            display = self.drawTimeMenu(display, images, value[4][1])
+
+            self.window.blit(display, (0, 0))
+            pygame.display.flip()
+
+        return value
+
+    def drawTimeMenu(self, display, images, seconds):
+        topLeft = (400, 50)
+        display.blit(images["title"], (topLeft[0] - self.buttonSize[0] // 2, topLeft[1]))
+
+        topLeft = (400, 800)
+        display.blit(images["start"], topLeft)
+
+        # buttons
+        topLeft = (400, 300)
+        display.blit(images["plus-1"], topLeft)
+
+        topLeft = topLeft[0] + 100, topLeft[1]
+        display.blit(images["plus-10"], topLeft)
+
+        topLeft = 400, 500
+        display.blit(images["minus-1"], topLeft)
+
+        topLeft = topLeft[0] + 100, topLeft[1]
+        display.blit(images["minus-10"], topLeft)
+
+        # seconds
+        rect = pygame.Rect(400, 400, 200, 100)
+        pygame.draw.rect(display, (0, 0, 0), rect)
+        font = pygame.font.Font(self.font, 20)
+        text = font.render(str(seconds), True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect.center
+
+        display.blit(text, textRect)
+
+        # seconds text
+        text = font.render("SECONDS", True, self.RED)
+        textRect = text.get_rect()
+        textRect.center = rect.center[0], rect.center[1] + 200
+
+        display.blit(text, textRect)
+
+        return display
+
+    def handleTimeClick(self, position, value):
+        running = True
+        index = position[0] // 100, position[1] // 100
+
+        if 4 <= index[0] <= 5:
+            if index[1] == 8:
+                running = False
+        if index[0] == 4:
+            if index[1] == 3:
+                value[4][1] += 1
+            elif index[1] == 5:
+                value[4][1] -= 1
+                if value[4][1] < 60:
+                    value[4][1] = 60
+        elif index[0] == 5:
+            if index[1] == 3:
+                value[4][1] += 10
+            elif index[1] == 5:
+                value[4][1] -= 10
+                if value[4][1] < 60:
+                    value[4][1] = 60
+
+        return running, value

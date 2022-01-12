@@ -8,7 +8,7 @@ def handleValue(value):
     if value[0] == 8:
         sys.exit()
     if 3 <= value[0] <= 6:
-        return (value[1], value[2], value[3], value[4])
+        return value[1], value[2], value[3], value[4]
 
 
 offset = 100
