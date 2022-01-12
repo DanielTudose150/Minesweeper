@@ -128,8 +128,14 @@ class Board:
     def getWon(self):
         return self.spaces == self.clicked
 
+    def setWon(self, won):
+        self.won = won
+
     def getLost(self):
         return self.lost
+
+    def setLost(self, lost):
+        self.lost = lost
 
     def setBombs(self, bombs):
         self.numberOfBombs = bombs

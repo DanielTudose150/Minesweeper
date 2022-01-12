@@ -66,6 +66,8 @@ class Game:
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
+            if self.checkTimer():
+                self.board.setLost(True)
             if self.board.getWon():
                 sound = pygame.mixer.Sound("sound\\win.mp3")
                 sound.play()
@@ -249,3 +251,9 @@ class Game:
 
     def startTimer(self, p):
         p.start()
+
+    def checkTimer(self):
+        with self.sharedSeconds:
+            if self.sharedSeconds.value <= 0:
+                return True
+        return False
