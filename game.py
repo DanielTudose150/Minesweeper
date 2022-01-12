@@ -1,6 +1,9 @@
 import pygame
 import os
 from time import sleep
+from countdown import Countdown
+from multiprocessing import Process
+from multiprocessing.sharedctypes import Value
 
 
 def setcwd():
@@ -11,6 +14,7 @@ def setcwd():
 
 class Game:
     def __init__(self, board, screenSize, offset, timed):
+        self.pieceSize = None
         self.screen = None
         self.images = None
         self.headerImages = {}
@@ -18,16 +22,22 @@ class Game:
         self.screenSize = screenSize
         self.offset = offset
         self.timed = timed
+        self.seconds = timed[1]
+        self.sharedSeconds = None
+        self.timer = self.setupTimer()
         self.rects = []
         self.running = True
         self.retry = False
         self.flags = board.getNoBombs()
         self.font = "font\\mine-sweeper.ttf"
+        self.firstClick = False
         self.setPieceSize((self.screenSize[0], self.screenSize[1] - self.offset), self.board.getSize())
         setcwd()
         self.loadImages()
         self.loadHeaderImages()
         self.getRects()
+        self.setupTimer()
+
         pygame.init()
         pygame.display.set_caption('Minesweeper')
 
@@ -63,6 +73,7 @@ class Game:
             self.board.__init__(self.board.getSize(), self.board.getNoBombs())
             self.retry = False
             self.flags = self.board.getNoBombs()
+            self.timed[1] = self.seconds
             self.run()
         pygame.quit()
 
@@ -115,6 +126,11 @@ class Game:
         if self.indexOutOfBounds(index):
             self.handleHeaderClick(position)
             return
+
+        if not self.firstClick:
+            self.firstClick = True
+            #self.startTimer(self.timer)
+        #self.timer.join(1)
         piece = self.board.getPiece(index)
         self.flags += self.board.handleClick(piece, index, rightClick)
 
@@ -195,10 +211,26 @@ class Game:
     def drawTime(self):
         RED = (255, 0, 0)
         font = pygame.font.Font(self.font, 20)
-        value = 0 if not self.timed[0] else self.timed[1]
+        # value = 0 if not self.timed[0] else self.timed[1]
+        value = 0
+        with self.sharedSeconds:
+            value = self.sharedSeconds.value
         text = font.render(str(value), True, RED)
         textRect = text.get_rect()
         textRect.center = self.rects[1].center
 
         self.screen.blit(text, textRect)
 
+    def setupTimer(self):
+        self.sharedSeconds = Value('i', self.timed[1])
+        p = Process(target=self.runTimer, args=[self.sharedSeconds])
+        return p
+
+    def startTimer(self, p):
+        p.start()
+
+    def runTimer(self, seconds):
+        finished = False
+        while not finished:
+            seconds.value -= 1
+            sleep(1)

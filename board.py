@@ -8,10 +8,14 @@ class Board:
         self.won = False
         self.board = None
         self.size = size
-        self.numberOfBombs = self.getNumberOfBombs(self.size)
+        self.numberOfBombs = self.getNumberOfBombs(self.size) if not custom else custom
         self.spaces = self.size[0] * self.size[1] - self.numberOfBombs
         self.clicked = 0
-        self.setBoard() if not custom else self.setBombs(custom)
+        # self.setBoard() if not custom else self.setBombs(custom)
+        if custom:
+            self.setBombs(custom)
+        else:
+            self.setBoard()
 
     def setBoard(self):
         self.board = []
@@ -93,6 +97,24 @@ class Board:
         if piece.getNumber() != 0:
             return 0
         move = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+        # move = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        q = []
+        q.append(index)
+        while len(q) > 0:
+            first = q.pop(0)
+            for m in move:
+                pos = first[0] + m[0], first[1] + m[1]
+                if self.outOfBounds(pos):
+                    continue
+                piece2 = self.getPiece(pos)
+                if piece2.getClicked() or piece2.getHasBomb() or piece2.getFlagged():
+                    continue
+                piece2.setClicked()
+                self.clicked += 1
+                if piece2.getNumber():
+                    continue
+                q.append(pos)
+        """"
         for m in move:
             pos = index[0] + m[0], index[1] + m[1]
             if self.outOfBounds(pos):
@@ -100,6 +122,7 @@ class Board:
             piece2 = self.getPiece(pos)
             if (not piece2.getHasBomb()) and (not piece2.getClicked()):
                 self.handleClick(piece2, pos, False)
+        """
         return 0
 
     def getWon(self):
