@@ -1,7 +1,6 @@
 import pygame
 import os
 from time import sleep
-from countdown import Countdown
 from multiprocessing import Process
 from multiprocessing.sharedctypes import Value
 
@@ -66,16 +65,13 @@ class Game:
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
-            if self.checkTimer():
+            if self.timed[0] and self.checkTimer():
                 self.board.setLost(True)
             if self.board.getWon():
                 sound = pygame.mixer.Sound("sound\\win.mp3")
                 sound.play()
                 sleep(3)
                 self.running = False
-                if self.timer is not None:
-                    self.timer.terminate()
-                # self.timer.close()
             if self.board.getLost():
                 self.drawBoard()
                 pygame.display.flip()
@@ -83,9 +79,6 @@ class Game:
                 sound.play()
                 sleep(3)
                 self.running = False
-                if self.timer is not None:
-                    self.timer.terminate()
-                    # self.timer.close()
         if self.retry:
             self.board.__init__(self.board.getSize(), self.board.getNoBombs())
             self.retry = False
@@ -93,11 +86,8 @@ class Game:
             self.flags = self.board.getNoBombs()
             self.timed[1] = self.seconds
             self.sharedSeconds.value = self.timed[1]
-            # self.setupTimer()
             self.firstClick = False
             self.run()
-        if self.timer is not None:
-            self.timer.terminate()
         pygame.quit()
 
     def draw(self):
@@ -235,8 +225,6 @@ class Game:
     def drawTime(self):
         RED = (255, 0, 0)
         font = pygame.font.Font(self.font, 20)
-        # value = 0 if not self.timed[0] else self.timed[1]
-        value = 0
         value = self.sharedSeconds.value
         text = font.render(str(value), True, RED)
         textRect = text.get_rect()
@@ -253,7 +241,9 @@ class Game:
         p.start()
 
     def checkTimer(self):
-        with self.sharedSeconds:
-            if self.sharedSeconds.value <= 0:
-                return True
+        if self.timed[0]:
+            with self.sharedSeconds:
+                if self.sharedSeconds.value <= 0:
+                    return True
+        self.sharedSeconds.value = 0
         return False

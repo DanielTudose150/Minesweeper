@@ -18,7 +18,6 @@ class Menu:
         self.images = {}
         self.screenSize = screenSize
         self.window = pygame.display.set_mode(self.screenSize)
-        # self.display = pygame.Surface(self.screenSize)
         self.GREY = (192, 192, 192)
         self.RED = (255, 0, 0)
         self.buttonSize = (200, 100)
@@ -36,22 +35,13 @@ class Menu:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     value = self.handleClick(position)
-            # self.display.fill(self.GREY)
             self.window.fill(self.GREY)
-            # self.window.blit(self.display, (0, 0))
             self.draw()
             pygame.display.flip()
-        if self.time[0]:
+        if self.time[0] and value[0] != 8:
             value = self.handleTimedMenu(value)
         pygame.quit()
         return value
-
-    def drawText(self, text, size, pos):
-        font = pygame.font.Font(self.font, size)
-        textSurface = font.render(text, True, self.RED)
-        textRect = textSurface.get_rect()
-        textRect.center = pos
-        self.display.blit(textSurface, textRect)
 
     def loadImages(self):
         for fileName in os.listdir("assets\\menu"):
@@ -65,17 +55,24 @@ class Menu:
         topLeft = (400, 50)
         image = self.images["title"]
         image = pygame.transform.scale(image, (self.buttonSize[0] * 2, self.buttonSize[1] * 2))
+
         self.window.blit(image, (topLeft[0] - self.buttonSize[0] // 2, topLeft[1]))
+
         topLeft = topLeft[0], topLeft[1] + 250
         self.window.blit(self.images["beginner"], topLeft)
+
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["intermediate"], topLeft)
+
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["expert"], topLeft)
+
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["custom"], topLeft)
+
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["time-no" if not self.time[0] else "time-yes"], topLeft)
+
         topLeft = topLeft[0], topLeft[1] + 110
         self.window.blit(self.images["exit"], topLeft)
 

@@ -2,8 +2,6 @@ import sys
 from game import Game
 from board import Board
 from menu import Menu
-import os
-import multiprocessing as mp
 
 
 def handleValue(value):
@@ -16,6 +14,7 @@ def handleValue(value):
 if __name__ == '__main__':
     offset = 100
     screenSize = (1000, 1000)
+
     menu = Menu(screenSize)
     running = menu.run()
 
