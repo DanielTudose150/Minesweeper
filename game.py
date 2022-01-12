@@ -6,12 +6,21 @@ from multiprocessing.sharedctypes import Value
 
 
 def setcwd():
+    """Sets the current working directory to the directory of the script."""
     abspath = os.path.abspath(__file__)
     dirname = os.path.dirname(abspath)
     os.chdir(dirname)
 
 
 def runTimer(seconds):
+    """
+    Represents the timer function
+
+    Parameters
+    ----------
+        seconds : multiprocessing.ctype
+            represents the number of seconds for the timer to count down
+    """
     finished = False
     while not finished:
         seconds.value -= 1
@@ -21,7 +30,105 @@ def runTimer(seconds):
 
 
 class Game:
+    """
+    A class used to represent the game of Minesweeper.
+
+    Attributes
+    ----------
+        pieceSize : (int, int)
+            width and height of the blocks
+        screen : pygame.Surface
+            the game window
+        images : dict
+            key : str
+                name of the image
+            value : pygame.image
+            Contains the assets for the game
+        board : Board
+            object representing the game board
+        screenSize : (int, int)
+            width and height of the window
+        offset : int
+            offset relative to the window origin
+        timed : [bool, int]
+            a list containing information about the timer of the game
+            the first element represents if a timer will be used in the game
+            the second element represents the number of seconds
+        seconds : int
+            the number of seconds for the timer
+        sharedSeconds : multiprocessing.ctype
+            the number of seconds for the timer
+            this attribute is shared between the main process and the timer process
+        timer : multiprocessing.Process
+            the process handling the timer
+        rects : list
+            contains the rectangles in the header
+        running : bool
+            the game loop condition
+        retry : bool
+            represents if the user wants to reset the board
+        retry2 : bool
+            represents a check to not reinitialise the timer
+        flags : int
+            represents the number of bombs shown in the header
+        font : str
+            the location of the font used to write text
+        firstClick : bool
+            tracks whether the first click has been made or not
+
+        Methods
+        -------
+            run():
+                Represents the game loop.
+            draw():
+                Draws the board and the header.
+            loadImages():
+                Loads the image assets and fills the image dictionary.
+            setPieceSize(screenSize, boardSize):
+                Determines the size of the blocks relative to the window and board sizes.
+            getImage(piece):
+                Retrieves the image corresponding to the given piece relative to its state.
+            handleClick(position, rightClick):
+                Processes the click interaction from the user and whether that was a right click or not.
+            indexOutOfBounds(index):
+                Checks if a given index is outside of the board.
+            loadHeaderImages():
+                Loads the header assets and fills the header image dictionary.
+            drawHeader():
+                Draws the header on the window.
+            getRects():
+                Sets the header rectangles up.
+            handleHeaderClick(position):
+                Processes the click interaction on the header from the user and sets specific flags.
+            drawBoard():
+                Draws the board after the user clicks on a mine.
+            drawFlags():
+                Draws the number of unflagged mines left.
+            drawTime():
+                Draws the seconds from the timer.
+            setupTimer():
+                Initialises the shared variable and creates the timer process.
+            startTimer():
+                Starts the timer process.
+            checkTimer():
+                Checks if the given seconds have been elapsed.
+    """
     def __init__(self, board, screenSize, offset, timed):
+        """
+        Initialises the necessary attributes. Updates the working directory. Loads necessary assets.
+
+        Parameters
+        ----------
+            board : Board
+                represents the board of the game
+            screenSize : (int, int)
+                width and height of the window
+            offset : int
+                the windows will be drawn offset pixels lower
+            timed : [bool, int]
+                the first value represents if the game will have a timer
+                the second value represents the seconds
+        """
         self.pieceSize = None
         self.screen = None
         self.images = None
@@ -50,6 +157,7 @@ class Game:
         pygame.display.set_caption('Minesweeper')
 
     def run(self):
+        """Represents the main game loop."""
         self.screen = pygame.display.set_mode(self.screenSize)
         self.running = True
         frameRate = pygame.time.Clock()
@@ -91,6 +199,7 @@ class Game:
         pygame.quit()
 
     def draw(self):
+        """Draws the board and the header."""
         topLeft = (0, self.offset)
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
@@ -103,6 +212,7 @@ class Game:
         self.drawHeader()
 
     def loadImages(self):
+        """Loads the board asserts and fills the board image dictionary."""
         self.images = {}
         for fileName in os.listdir("assets\\game"):
             if not fileName.endswith(".png"):
@@ -112,10 +222,32 @@ class Game:
             self.images[fileName.split(".")[0]] = image
 
     def setPieceSize(self, screenSize, boardSize):
+        """
+        Determines the size of the blocks relative to the screen and board sizes
+
+        Parameters
+        ----------
+            screenSize : (int, int)
+                width and height of the windows
+            boardSize : (int, int)
+                width and height of the board
+        """
         maxi = max(boardSize[0], boardSize[1])
         self.pieceSize = screenSize[0] // maxi, screenSize[1] // maxi
 
     def getImage(self, piece):
+        """
+        Retrieves the image corresponding to the given piece relative to its state.
+
+        Parameters
+        ----------
+            piece : Piece
+                object representing a piece from the board
+
+        Return
+        ------
+            image : pygame.Image
+        """
         string = None
         if piece.getClicked():
             if piece.getHasBomb():
@@ -133,6 +265,16 @@ class Game:
         return self.images[string]
 
     def handleClick(self, position, rightClick):
+        """
+        Processes the click interaction from the user and whether that was a right click or not.
+
+        Parameters
+        ----------
+            position : (int, int)
+                coordinates of where the user clicked on the window
+            rightClick : bool
+                represents whether the click was a right click or not
+        """
         if self.board.getLost():
             return
         index = (position[1] - self.offset) // self.pieceSize[1], position[0] // self.pieceSize[0]
@@ -149,6 +291,14 @@ class Game:
         self.flags += self.board.handleClick(piece, index, rightClick)
 
     def indexOutOfBounds(self, index):
+        """
+        Checks if a given index is outside of the board.
+
+        Parameters
+        ----------
+            index : (int, int)
+                coordinates
+        """
         if index[0] < 0 or index[0] >= self.board.getSize()[0]:
             return True
         if index[1] < 0 or index[1] >= self.board.getSize()[1]:
@@ -156,6 +306,7 @@ class Game:
         return False
 
     def loadHeaderImages(self):
+        """Loads the header assets and fills the header image dictionary."""
         self.headerImages["header"] = self.images["header"]
         self.headerImages["header"] = pygame.transform.scale(self.headerImages["header"], (1000, 100))
 
@@ -169,6 +320,7 @@ class Game:
         self.headerImages["retry"] = pygame.transform.scale(self.headerImages["retry"], (50, 50))
 
     def drawHeader(self):
+        """Draws the header on the window."""
         topLeft = (0, 0)
         self.screen.blit(self.headerImages["header"], topLeft)
 
@@ -188,6 +340,7 @@ class Game:
         self.drawTime()
 
     def getRects(self):
+        """Sets the header rectangles up."""
         flags = pygame.Rect(100, 25, 100, 50)
         self.rects.append(flags)
 
@@ -195,6 +348,14 @@ class Game:
         self.rects.append(timer)
 
     def handleHeaderClick(self, position):
+        """
+        Processes the click interaction on the header from the user and sets specific flags.
+
+        Parameters
+        ----------
+            position : (int, int)
+                coordinates of where the user clicked on the window
+        """
         index = position[0] // 50, position[1] // 25
         if index[0] == 8:
             if 1 <= index[1] <= 2:
@@ -205,6 +366,7 @@ class Game:
                 self.running = False
 
     def drawBoard(self):
+        """Draws the board after the user clicks on a mine."""
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
                 piece = self.board.getPiece((row, col))
@@ -214,6 +376,7 @@ class Game:
         self.draw()
 
     def drawFlags(self):
+        """Draws the number of unflagged mines left."""
         RED = (255, 0, 0)
         font = pygame.font.Font(self.font, 20)
         text = font.render(str(self.flags), True, RED)
@@ -223,6 +386,7 @@ class Game:
         self.screen.blit(text, textRect)
 
     def drawTime(self):
+        """Draws the seconds from the timer."""
         RED = (255, 0, 0)
         font = pygame.font.Font(self.font, 20)
         value = self.sharedSeconds.value
@@ -233,14 +397,30 @@ class Game:
         self.screen.blit(text, textRect)
 
     def setupTimer(self):
+        """
+        Initialises the shared variable and creates the timer process.
+
+        Return
+        ------
+            p : Process
+                represents the timer process
+        """
         self.sharedSeconds = Value('i', self.timed[1])
         p = Process(target=runTimer, args=[self.sharedSeconds])
         return p
 
     def startTimer(self, p):
+        """Starts the timer process."""
         p.start()
 
     def checkTimer(self):
+        """
+        Checks if the given seconds have been elapsed.
+
+        Return
+        ------
+            sharedSeconds.value <= 0
+        """
         if self.timed[0]:
             with self.sharedSeconds:
                 if self.sharedSeconds.value <= 0:

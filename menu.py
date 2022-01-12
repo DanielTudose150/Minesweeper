@@ -22,6 +22,7 @@ class Menu:
             key : str
                 name of the image
             value : pygame.image
+            Contains the assets for the menu
         screenSize : (int, int)
             width and height of the window
         window : pygame.Surface
