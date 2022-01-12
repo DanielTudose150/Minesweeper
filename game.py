@@ -12,6 +12,15 @@ def setcwd():
     os.chdir(dirname)
 
 
+def runTimer(seconds):
+    finished = False
+    while not finished:
+        seconds.value -= 1
+        sleep(1)
+        if seconds.value <= 0:
+            finished = not finished
+
+
 class Game:
     def __init__(self, board, screenSize, offset, timed):
         self.pieceSize = None
@@ -28,6 +37,7 @@ class Game:
         self.rects = []
         self.running = True
         self.retry = False
+        self.retry2 = False
         self.flags = board.getNoBombs()
         self.font = "font\\mine-sweeper.ttf"
         self.firstClick = False
@@ -36,7 +46,6 @@ class Game:
         self.loadImages()
         self.loadHeaderImages()
         self.getRects()
-        self.setupTimer()
 
         pygame.init()
         pygame.display.set_caption('Minesweeper')
@@ -62,6 +71,9 @@ class Game:
                 sound.play()
                 sleep(3)
                 self.running = False
+                if self.timer is not None:
+                    self.timer.terminate()
+                # self.timer.close()
             if self.board.getLost():
                 self.drawBoard()
                 pygame.display.flip()
@@ -69,12 +81,21 @@ class Game:
                 sound.play()
                 sleep(3)
                 self.running = False
+                if self.timer is not None:
+                    self.timer.terminate()
+                    # self.timer.close()
         if self.retry:
             self.board.__init__(self.board.getSize(), self.board.getNoBombs())
             self.retry = False
+            self.retry2 = True
             self.flags = self.board.getNoBombs()
             self.timed[1] = self.seconds
+            self.sharedSeconds.value = self.timed[1]
+            # self.setupTimer()
+            self.firstClick = False
             self.run()
+        if self.timer is not None:
+            self.timer.terminate()
         pygame.quit()
 
     def draw(self):
@@ -129,8 +150,9 @@ class Game:
 
         if not self.firstClick:
             self.firstClick = True
-            #self.startTimer(self.timer)
-        #self.timer.join(1)
+            if not self.retry2:
+                self.startTimer(self.timer)
+
         piece = self.board.getPiece(index)
         self.flags += self.board.handleClick(piece, index, rightClick)
 
@@ -213,8 +235,7 @@ class Game:
         font = pygame.font.Font(self.font, 20)
         # value = 0 if not self.timed[0] else self.timed[1]
         value = 0
-        with self.sharedSeconds:
-            value = self.sharedSeconds.value
+        value = self.sharedSeconds.value
         text = font.render(str(value), True, RED)
         textRect = text.get_rect()
         textRect.center = self.rects[1].center
@@ -223,14 +244,8 @@ class Game:
 
     def setupTimer(self):
         self.sharedSeconds = Value('i', self.timed[1])
-        p = Process(target=self.runTimer, args=[self.sharedSeconds])
+        p = Process(target=runTimer, args=[self.sharedSeconds])
         return p
 
     def startTimer(self, p):
         p.start()
-
-    def runTimer(self, seconds):
-        finished = False
-        while not finished:
-            seconds.value -= 1
-            sleep(1)
