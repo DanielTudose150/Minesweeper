@@ -245,5 +245,4 @@ class Game:
             with self.sharedSeconds:
                 if self.sharedSeconds.value <= 0:
                     return True
-        self.sharedSeconds.value = 0
         return False

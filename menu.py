@@ -4,14 +4,77 @@ from time import sleep
 
 
 def setcwd():
+    """Sets the current working directory to the directory of the script."""
     abspath = os.path.abspath(__file__)
     dirname = os.path.dirname(abspath)
     os.chdir(dirname)
 
 
 class Menu:
+    """
+    A class used to represent a menu and for interacting with the user and getting the game parameters.
+
+    Attributes
+    ----------
+        running : bool
+            loop condition for the main menu loop
+        images : dict
+            key : str
+                name of the image
+            value : pygame.image
+        screenSize : (int, int)
+            width and height of the window
+        window : pygame.Surface
+            canvas on top of which objects are drawn
+        GREY : (int, int, int)
+            RGB constant for the color grey
+        RED : (int, int, int)
+            RGB constant for the color red
+        buttonSize : (int, int)
+            width and height of the buttons that will be drawn on the main menu
+        time : [bool, int]
+            first element represents if a timer will be used in the game
+            second element represents the number of seconds that the timer will count down
+        font : str
+            path to the font that will be used for the text
+
+    Methods
+    -------
+        run():
+            Represents the main menu loop.
+        loadImages():
+            Loads the assets for the main menu and sets up the images dictionary.
+        draw():
+            Draws the main menu.
+        handleClick(position):
+            Processes the click interaction from the user and returns a list of responses.
+        handleCustom():
+            Represents the custom menu loop.
+        getCustomImages():
+            Loads the assets for the custom menu and returns the filled dictionary.
+        drawCustomButtons(display, images):
+            Draws the buttons in images to the display.
+        drawRectangles(display, row, col, mines):
+            Draws rectangles on top of which will be drawn the number of rows, columns and mines.
+        handleCustomClick(position, row, col, mines):
+            Processes the click interaction from the user and returns a list of responses.
+        handleTimeMenu():
+            Represents the timer menu loop.
+        drawTimeMenu(display, images, seconds):
+            Draws the elements of the timer menu.
+        handleTimeClick(position, value):
+            Processes the click interaction from the user and returns a list of responses.
+    """
 
     def __init__(self, screenSize):
+        """
+        Initialises the necessary attributes. Updates the current working directory. Loads assets.
+
+        Parameters
+        ----------
+            screenSize : (int, int)
+                width and height of the window
+        """
         setcwd()
         pygame.init()
         self.running = True
@@ -27,6 +90,20 @@ class Menu:
         pygame.display.set_caption('Minesweeper')
 
     def run(self):
+        """
+        Represents the main menu loop. Return the response from the user interaction.
+
+        Return
+        ------
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+        """
         value = [8, 0, 0, 0, self.time]
         while self.running:
             for event in pygame.event.get():
@@ -44,6 +121,7 @@ class Menu:
         return value
 
     def loadImages(self):
+        """Loads the main menu assets and fills the images dictionary."""
         for fileName in os.listdir("assets\\menu"):
             if not fileName.endswith(".png"):
                 continue
@@ -52,6 +130,7 @@ class Menu:
             self.images[fileName.split(".")[0]] = image
 
     def draw(self):
+        """Draws the main menu."""
         topLeft = (400, 50)
         image = self.images["title"]
         image = pygame.transform.scale(image, (self.buttonSize[0] * 2, self.buttonSize[1] * 2))
@@ -77,6 +156,25 @@ class Menu:
         self.window.blit(self.images["exit"], topLeft)
 
     def handleClick(self, position):
+        """
+        Processes the click interaction from the user and returns a list of responses.
+
+        Parameters
+        ----------
+            position : (int, int)
+                coordinates of where the user clicked on the window
+
+        Return
+        ------
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+        """
         index = position[0] // 100, position[1] // 100
 
         if not (4 <= index[0] < 6):
@@ -101,6 +199,20 @@ class Menu:
             return [8, 0, 0, 0, self.time]
 
     def handleCustom(self):
+        """
+        Represents the custom menu loop. Returns a list responses after the interaction with the user.
+
+        Return
+        ------
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+        """
         row = 9
         col = 9
         mines = 10
@@ -128,9 +240,21 @@ class Menu:
             self.window.blit(display, (0, 0))
             pygame.display.flip()
 
-        return (6, row, col, mines, self.time)
+        value = (6, row, col, mines, self.time)
+        return value
 
     def getCustomImages(self):
+        """
+        Loads the assets for the custom menu and returns a dictionary filled with them.
+
+        Return
+        ------
+            images : dict
+                key : str
+                    name of the image
+                value : pygame.image
+
+        """
         images = {}
         for key in self.images.keys():
             if "plus" in key or "minus" in key:
@@ -145,6 +269,21 @@ class Menu:
         return images
 
     def drawCustomButtons(self, display, images):
+        """
+        Draws the buttons for the custom menu.
+
+        Parameters
+        ----------
+            display : pygame.Surface
+                the layer on which the images will be drawn on
+            images : dict
+                dictionary that contains the custom menu assets
+
+        Return
+        ------
+            display : pygame.Surface
+                the layer after the assets were drawn
+        """
         topLeftLeft = (100, 300)
         topLeftCenter = (400, 300)
         topLeftRight = (700, 300)
@@ -196,6 +335,25 @@ class Menu:
         return display
 
     def drawRectangles(self, display, row, col, mines):
+        """
+        Draws rectangles on top of which will be drawn the number of rows, columns and mines.
+
+        Parameters
+        ----------
+            display : pygame.Surface
+                the layer on which the assets will be drawn
+            row : int
+                the number of rows for the game
+            col : int
+                the number of columns for the game
+            mines : int
+                the number of mines for the game
+
+        Return
+        ------
+            display : pygame.Surface
+                the layer after the assets were drawn
+        """
         rect1 = pygame.Rect(100, 400, 200, 100)
         rect2 = pygame.Rect(400, 400, 200, 100)
         rect3 = pygame.Rect(700, 400, 200, 100)
@@ -252,6 +410,28 @@ class Menu:
         return display
 
     def handleCustomClick(self, position, row, col, mines):
+        """
+        Processes the click interaction from the user and returns a list of game parameters.
+
+        Parameters
+        ----------
+            position : (int, int)
+                coordinates of where the user clicked on the window
+            row : int
+                number of rows for the game
+            col : int
+                number of columns for the game
+            mines : int
+                number of mines for the game
+
+        Return
+        ------
+            value = (bool, int, int, int)
+                first value represents the loop condition for the custom menu
+                second value represents number of rows for the game
+                third value represents number of columns for the game
+                fourth value represents number of mines for the game
+        """
         running = True
         index = position[0] // 50, position[1] // 100
 
@@ -312,9 +492,35 @@ class Menu:
                 if mines < 3:
                     mines = 3
 
-        return running, row, col, mines
+        value = (running, row, col, mines)
+        return value
 
     def handleTimedMenu(self, value):
+        """
+        Represents the timer menu loop. Returns a list responses after the interaction with the user.
+
+        Parameters
+        ----------
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+
+        Return
+        ------
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+        """
         running = True
         images = self.getCustomImages()
         display = pygame.Surface(self.screenSize)
@@ -342,6 +548,23 @@ class Menu:
         return value
 
     def drawTimeMenu(self, display, images, seconds):
+        """
+        Draws the timer menu.
+
+        Parameters
+        ----------
+            display : pygame.Surface
+                the layer on which the assets will be drawn on
+            images : dict
+                dictionary that contains the custom menu assets
+            seconds : int
+                number of seconds to be desplayed
+
+        Return
+        ------
+            display : pygame.Surface
+                the layer after the assets were drawn
+        """
         topLeft = (400, 50)
         display.blit(images["title"], (topLeft[0] - self.buttonSize[0] // 2, topLeft[1]))
 
@@ -381,6 +604,35 @@ class Menu:
         return display
 
     def handleTimeClick(self, position, value):
+        """
+        Processes the click interaction from the user and returns a list of game parameters.
+
+        Parameters
+        ----------
+            position : (int, int)
+                coordinates of where the user clicked on the window
+            value [int, int, int, int, [bool, int]]
+                first value represents the option selected by the user
+                second value represents the number of rows
+                third value represents the number of columns
+                fourth value represents the number of mines
+                fifth value represents a pair regarding the timer:
+                    first value represents if a timer will be used in the game
+                    second value represents the number of seconds for the timer
+
+        Return
+        ------
+            res : (bool, [int, int, int, int, [bool, int]])
+                the first value represents the loop condition of the timer menu
+                the second value represents the list of the processed information of the user
+                    first value represents the option selected by the user
+                    second value represents the number of rows
+                    third value represents the number of columns
+                    fourth value represents the number of mines
+                    fifth value represents a pair regarding the timer:
+                        first value represents if a timer will be used in the game
+                        second value represents the number of seconds for the timer
+        """
         running = True
         index = position[0] // 100, position[1] // 100
 
@@ -402,4 +654,5 @@ class Menu:
                 if value[4][1] < 60:
                     value[4][1] = 60
 
-        return running, value
+        res = (running, value)
+        return res
