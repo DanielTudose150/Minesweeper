@@ -1,6 +1,7 @@
 import pygame
 import os
 from time import sleep
+from random import randint
 
 
 def setcwd():
@@ -84,6 +85,8 @@ class Menu:
         self.window = pygame.display.set_mode(self.screenSize)
         self.GREY = (192, 192, 192)
         self.RED = (255, 0, 0)
+        self.BLUE = (0, 0, 255)
+        self.randomized = [False, False, False]
         self.buttonSize = (200, 100)
         self.time = [False, 0]
         self.font = "font\\mine-sweeper.ttf"
@@ -110,6 +113,7 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    value[0] = 8
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     value = self.handleClick(position)
@@ -221,10 +225,12 @@ class Menu:
         running = True
         images = self.getCustomImages()
         display = pygame.Surface(self.screenSize)
+        quit = False
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    quit = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     value = self.handleCustomClick(position, row, col, mines)
@@ -241,7 +247,9 @@ class Menu:
             self.window.blit(display, (0, 0))
             pygame.display.flip()
 
-        value = (6, row, col, mines, self.time)
+        value = [6, row, col, mines, self.time]
+        if quit:
+            value[0] = 8
         return value
 
     def getCustomImages(self):
@@ -266,6 +274,7 @@ class Menu:
 
         images["title"] = pygame.transform.scale(self.images["title"], (self.buttonSize[0] * 2, self.buttonSize[1] * 2))
         images["start"] = self.images["start"]
+        images["empty-random"] = self.images["empty-random"]
 
         return images
 
@@ -331,7 +340,10 @@ class Menu:
         topLeft = (400, 50)
         display.blit(images["title"], (topLeft[0] - self.buttonSize[0] // 2, topLeft[1]))
 
-        topLeft = (400, 800)
+        topLeft = (400, 700)
+        display.blit(images["empty-random"], topLeft)
+
+        topLeft = (400, 900)
         display.blit(images["start"], topLeft)
         return display
 
@@ -365,21 +377,21 @@ class Menu:
 
         # rows counter
         font = pygame.font.Font(self.font, 20)
-        text = font.render(str(row), True, self.RED)
+        text = font.render(str(row), True, self.RED if not self.randomized[0] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect1.center
 
         display.blit(text, textRect)
 
         # row text
-        text = font.render("ROWS", True, self.RED)
+        text = font.render("ROWS", True, self.RED if not self.randomized[0] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect1.center[0], rect1.center[1] + 200
 
         display.blit(text, textRect)
 
         # columns counter
-        text = font.render(str(col), True, self.RED)
+        text = font.render(str(col), True, self.RED if not self.randomized[1] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect2.center
 
@@ -387,14 +399,14 @@ class Menu:
 
         # column text
 
-        text = font.render("COLUMNS", True, self.RED)
+        text = font.render("COLUMNS", True, self.RED if not self.randomized[1] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect2.center[0], rect2.center[1] + 200
 
         display.blit(text, textRect)
 
         # mines counter
-        text = font.render(str(mines), True, self.RED)
+        text = font.render(str(mines), True, self.RED if not self.randomized[2] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect3.center
 
@@ -402,9 +414,19 @@ class Menu:
 
         # mine counter
 
-        text = font.render("MINES", True, self.RED)
+        text = font.render("MINES", True, self.RED if not self.randomized[2] else self.BLUE)
         textRect = text.get_rect()
         textRect.center = rect3.center[0], rect3.center[1] + 200
+
+        display.blit(text, textRect)
+
+        # RANDOM BUTTON
+
+        rectRandom = pygame.Rect(400, 700, 200, 100)
+        # pygame.draw.rect(display, (0, 0, 0), rectRandom)
+        text = font.render("RANDOM", True, self.BLUE)
+        textRect = text.get_rect()
+        textRect.center = rectRandom.center[0], rectRandom.center[1]
 
         display.blit(text, textRect)
 
@@ -435,63 +457,91 @@ class Menu:
         """
         running = True
         index = position[0] // 50, position[1] // 100
+        value = None
 
         if 2 <= index[0] <= 3:
             if index[1] == 3:
                 row += 1
                 if row > 99:
                     row = 99
+                self.randomized[0] = False
             elif index[1] == 5:
                 row -= 1
                 if row < 5:
                     row = 5
+                self.randomized[0] = False
         elif 4 <= index[0] <= 5:
             if index[1] == 3:
                 row += 10
                 if row > 99:
                     row = 99
+                self.randomized[0] = False
             elif index[1] == 5:
                 row -= 10
                 if row < 5:
                     row = 5
+                self.randomized[0] = False
         elif 8 <= index[0] <= 9:
             if index[1] == 3:
                 col += 1
                 if col > 99:
                     col = 99
+                self.randomized[1] = False
             elif index[1] == 5:
                 col -= 1
                 if col < 5:
                     col = 5
-            elif index[1] == 8:
+                self.randomized[1] = False
+            elif index[1] == 9:
                 running = False
+            elif index[1] == 7:
+                self.randomized = [True, True, True]
+                value = self.randomizeCustom(row, col, mines)
+                row = value[0]
+                col = value[1]
+                mines = value[2]
+
         elif 10 <= index[0] <= 11:
             if index[1] == 3:
                 col += 10
                 if col > 99:
                     col = 99
+                self.randomized[1] = False
             elif index[1] == 5:
                 col -= 10
                 if col < 5:
                     col = 5
+                self.randomized[1] = False
+            elif index[1] == 9:
+                running = False
+            elif index[1] == 7:
+                self.randomized = [True, True, True]
+                value = self.randomizeCustom(row, col, mines)
+                row = value[0]
+                col = value[1]
+                mines = value[2]
         elif 14 <= index[0] <= 15:
             if index[1] == 3:
                 mines += 1
                 if mines > row * col:
                     mines = row * col
+                self.randomized[2] = False
             elif index[1] == 5:
                 mines -= 1
                 if mines < 3:
                     mines = 3
+                self.randomized[2] = False
         elif 16 <= index[0] <= 17:
             if index[1] == 3:
                 mines += 10
                 if mines > row * col:
                     mines = row * col
+                self.randomized[2] = False
             elif index[1] == 5:
                 mines -= 10
                 if mines < 3:
                     mines = 3
+                self.randomized[2] = False
 
         value = (running, row, col, mines)
         return value
@@ -528,11 +578,12 @@ class Menu:
         value[4][1] = 100
 
         # value = [mode, row, col, mines, [timed, seconds]]
-
+        quit = False
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    quit = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     res = self.handleTimeClick(position, value)
@@ -546,6 +597,8 @@ class Menu:
             self.window.blit(display, (0, 0))
             pygame.display.flip()
 
+        if quit:
+            value[0] = 8
         return value
 
     def drawTimeMenu(self, display, images, seconds):
@@ -657,3 +710,17 @@ class Menu:
 
         res = (running, value)
         return res
+
+    def randomizeCustom(self, row, col, mines):
+        row = randint(5, 99)
+        col = randint(5, 99)
+
+        """
+        Number of mines will be randomized between 10% and 20% of the blocks.
+        Those percentages are calculated related to the Beginner(aprox. 12% mines) and Expert(aprox. 21% mines) difficulties.
+        """
+        lowerBound = int(0.1 * row * col)
+        upperBound = int(0.2 * row * col)
+        mines = randint(lowerBound, upperBound)
+        value = [row, col, mines]
+        return value
