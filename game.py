@@ -288,7 +288,7 @@ class Game:
 
         if not self.firstClick:
             self.firstClick = True
-            if not self.retry2:
+            if not self.retry2 and self.timed[0]:
                 self.startTimer(self.timer)
 
         piece = self.board.getPiece(index)
@@ -397,7 +397,7 @@ class Game:
         """Draws the seconds from the timer."""
         RED = (255, 0, 0)
         font = pygame.font.Font(self.font, 20)
-        value = self.sharedSeconds.value
+        value = self.sharedSeconds.value if self.timed[0] else 0
         text = font.render(str(value), True, RED)
         textRect = text.get_rect()
         textRect.center = self.rects[1].center
