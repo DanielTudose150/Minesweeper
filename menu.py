@@ -612,7 +612,7 @@ class Menu:
         ----------
             position : (int, int)
                 coordinates of where the user clicked on the window
-            value [int, int, int, int, [bool, int]]
+            value : [int, int, int, int, [bool, int]]
                 first value represents the option selected by the user
                 second value represents the number of rows
                 third value represents the number of columns
@@ -645,15 +645,15 @@ class Menu:
                 value[4][1] += 1
             elif index[1] == 5:
                 value[4][1] -= 1
-                if value[4][1] < 60:
-                    value[4][1] = 60
+                if value[4][1] < 5:
+                    value[4][1] = 5
         elif index[0] == 5:
             if index[1] == 3:
                 value[4][1] += 10
             elif index[1] == 5:
                 value[4][1] -= 10
-                if value[4][1] < 60:
-                    value[4][1] = 60
+                if value[4][1] < 5:
+                    value[4][1] = 5
 
         res = (running, value)
         return res

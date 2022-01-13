@@ -139,7 +139,7 @@ class Game:
         self.timed = timed
         self.seconds = timed[1]
         self.sharedSeconds = None
-        self.timer = self.setupTimer()
+        self.timer = self.setupTimer() if timed[0] else None
         self.rects = []
         self.running = True
         self.retry = False
@@ -180,6 +180,8 @@ class Game:
                 sound.play()
                 sleep(3)
                 self.running = False
+                if not isinstance(self.timer, type(None)):
+                    self.timer.terminate()
             if self.board.getLost():
                 self.drawBoard()
                 pygame.display.flip()
@@ -187,6 +189,8 @@ class Game:
                 sound.play()
                 sleep(3)
                 self.running = False
+                if not isinstance(self.timer, type(None)):
+                    self.timer.terminate()
         if self.retry:
             self.board.__init__(self.board.getSize(), self.board.getNoBombs())
             self.retry = False
