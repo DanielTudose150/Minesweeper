@@ -197,7 +197,8 @@ class Game:
             self.retry2 = True
             self.flags = self.board.getNoBombs()
             self.timed[1] = self.seconds
-            self.sharedSeconds.value = self.timed[1]
+            if self.timed[0]:
+                self.sharedSeconds.value = self.timed[1]
             self.firstClick = False
             self.run()
         pygame.quit()
